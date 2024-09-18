@@ -39,13 +39,16 @@ def on_search():
 # Function to handle submission of test results
 def on_submit():
     serial_number = serial_number_entry.get()
+    PCBA_Number=PCBA_Number_entry.get()
     status = status_var.get()
     pc_name = Stage_selection.get()
     problem = problem_selection.get()
+    Failure_stage=Stage_selection.get()
+
     #failure_reason = failure_reason_entry.get()
 
     if serial_number and status and pc_name:
-        insert_test_result(serial_number, status, pc_name, problem)
+        insert_test_result(serial_number,PCBA_Number, status, pc_name, problem,Failure_stage)
         messagebox.showinfo("Success", "Test result saved.")
         # Clear the fields after submission
         clear_fields()
@@ -58,13 +61,15 @@ def clear_fields():
     status_var.set("Passed")
     Stage_selection.set("")
     problem_selection.set("")
-    #failure_reason_entry.delete(0, tk.END)
+
 
 # Create main window
 root = tk.Tk()
 root.title("ZenTrace")
-root.geometry("1000x600+5+5")  # Position at top-left corner (0,0)
-root.config(bg="black")
+root.geometry("1300x720+5+5")  # Position at top-left corner (0,0)
+root.maxsize(1800,800)
+root.minsize(1000,600)
+
 
 # Set the background color you want for the frames
 bg_color = "#DEF3EE"
@@ -94,59 +99,67 @@ operation_history_notebook = ttk.Notebook(operation_history_frame)
 
 # Create frames for the sub-tabs with the background color
 meters_frame = tk.Frame(operation_history_notebook, bg=bg_color)  # Set background color
-modules_frame = tk.Frame(operation_history_notebook, bg=bg_color)  # Set background color
-
+Failure_History_frame = ttk.Frame(operation_history_notebook,bg="#DEF3EE") # Set background color
 # Add the sub-tabs to the operation history notebook
 operation_history_notebook.add(meters_frame, text="Meters")
-operation_history_notebook.add(modules_frame, text="Modules")
+operation_history_notebook.add(Failure_History_frame, text='Failure History')
 
-# Add search section inside the "Meters" tab (meters_frame)
-tk.Label(meters_frame, text="Search Serial Number:", font="bold", bg=bg_color, fg="Black").grid(row=0, column=0, padx=10, pady=10)
-search_serial_number_entry = tk.Entry(meters_frame)
+# Add search section inside the "Failure History" tab (Failure_History_frame)
+tk.Label(Failure_History_frame, text="Search Serial Number:", font="lucida 8 bold",bg=meters_frame.cget("bg"), fg="Black").grid(row=0, column=0, padx=10, pady=10)
+search_serial_number_entry = tk.Entry(Failure_History_frame)
 search_serial_number_entry.grid(row=0, column=1, padx=(20, 20), pady=(10,10))
-search_button = tk.Button(meters_frame, text="Search", command=on_search)
+search_button = tk.Button(Failure_History_frame, text="Search", command=on_search)
 search_button.grid(row=0, column=2, padx=10, pady=10)
 
 # Result frame inside the "Meters" tab to display search results
-result_frame = tk.Frame(meters_frame, bg="#f0f0f0")
+result_frame = tk.Frame(Failure_History_frame, bg="#f0f0f0")
 result_frame.grid(row=1, column=0, columnspan=3, padx=10, pady=10, sticky="nw")
+
+dummy_tab1_frame = ttk.Frame(operation_history_notebook)
+operation_history_notebook.add(dummy_tab1_frame, text='Low Voltage')
+
+dummy_tab2_frame = ttk.Frame(operation_history_notebook)
+operation_history_notebook.add(dummy_tab2_frame, text='High Voltage')
+
+
+
+
 
 # Rework & Debug section
 # Serial Number
-tk.Label(rework_debug_frame, text="Serial Number:", anchor='w', width=20, bg=rework_debug_frame.cget("bg")).grid(row=0, column=0, padx=10, pady=10, sticky='w')
-serial_number_entry = tk.Entry(rework_debug_frame, width=30)
+tk.Label(meters_frame, text="Serial Number:", anchor='w', width=20,  font="lucida 8 bold",bg="light grey").grid(row=0, column=0, padx=10, pady=10, sticky='w')
+serial_number_entry = tk.Entry(meters_frame, width=30)
 serial_number_entry.grid(row=0, column=1, padx=10, pady=10, sticky='w')
 
+# Serial Number
+tk.Label(meters_frame, text="PCBA_Number:", anchor='w', width=20, font="lucida 8 bold",bg="light grey").grid(row=0, column=3, padx=2, pady=10, sticky='w')
+PCBA_Number_entry = tk.Entry(meters_frame, width=30)
+PCBA_Number_entry.grid(row=0, column=4, padx=10, pady=10, sticky='w')
+
 # Status radio buttons
-tk.Label(rework_debug_frame, text="Status:", anchor='w', width=20, bg=rework_debug_frame.cget("bg")).grid(row=1, column=0, padx=10, pady=10, sticky='w')
+tk.Label(meters_frame, text="Status:", anchor='w', width=20,  font="lucida 8 bold",bg="light grey").grid(row=1, column=0, padx=10, pady=10, sticky='w')
 status_var = tk.StringVar(value="Passed")
-tk.Radiobutton(rework_debug_frame, text="Passed", variable=status_var, value="Passed", bg=rework_debug_frame.cget("bg")).grid(row=1, column=1, padx=0, pady=10, sticky='w')
-tk.Radiobutton(rework_debug_frame, text="Failed", variable=status_var, value="Failed", bg=rework_debug_frame.cget("bg")).grid(row=1, column=2, padx=0, pady=10, sticky='w')
+tk.Radiobutton(meters_frame, text="Passed", variable=status_var, value="Passed", bg=meters_frame.cget("bg")).grid(row=1, column=1, padx=0, pady=10, sticky='w')
+tk.Radiobutton(meters_frame, text="Failed", variable=status_var, value="Failed", bg=meters_frame.cget("bg")).grid(row=1, column=2, padx=0, pady=10)
 
 # Problem selection dropdown
-tk.Label(rework_debug_frame, text="Select Problem:", anchor='w', width=20, bg=rework_debug_frame.cget("bg")).grid(row=2, column=0, padx=10, pady=10, sticky='w')
+tk.Label(meters_frame, text="Select Problem:", anchor='w', width=20,  font="lucida 8 bold",bg="light grey").grid(row=2, column=0, padx=10, pady=10, sticky='w')
 choices = ("Not getting power On", "LED Blinking", "Mag fail", "Relay Disconnect fail", "Relay Open fail")
-problem_selection = ttk.Combobox(rework_debug_frame, values=choices, width=27)
+problem_selection = ttk.Combobox(meters_frame, values=choices, width=27)
 problem_selection.grid(row=2, column=1, padx=10, pady=10, sticky='w')
 
 # PC Name entry
-tk.Label(rework_debug_frame, text="Stage:", anchor='w', width=20, bg=rework_debug_frame.cget("bg")).grid(row=3, column=0, padx=10, pady=10, sticky='w')
+tk.Label(meters_frame, text="Failure_stage:", anchor='w', width=20, font="lucida 8 bold",bg="light grey").grid(row=3, column=0, padx=10, pady=10, sticky='w')
 choices = ("Product Integration","Firmware", "TCPIP", "Calibration", "Accuracy", "Parameter testing", "Final Verification")
-Stage_selection = ttk.Combobox(rework_debug_frame, values=choices, width=27)
+Stage_selection = ttk.Combobox(meters_frame, values=choices, width=27)
 Stage_selection.grid(row=3, column=1, padx=10, pady=10, sticky='w')
 
-'''# Failure Reason entry
-tk.Label(rework_debug_frame, text="Failure Reason (if any):", anchor='w', width=20, bg=rework_debug_frame.cget("bg")).grid(row=4, column=0, padx=10, pady=10, sticky='w')
-failure_reason_entry = tk.Entry(rework_debug_frame, width=30)
-failure_reason_entry.grid(row=4, column=1, padx=10, pady=10, sticky='w')'''
-
-
 # Submit button
-submit_button = tk.Button(rework_debug_frame, text="Submit",bg=rework_debug_frame.cget("bg"), command=on_submit)
+submit_button = tk.Button(meters_frame, text="Submit",font="lucida 8 bold",bg="light blue", command=on_submit)
 submit_button.grid(row=5, column=0, columnspan=2, padx=10, pady=10)
 
-# Pack the operation history notebook inside the operation history tab
-operation_history_notebook.pack(expand=1, fill="both")
+# Pack the nested notebook to make it visible
+operation_history_notebook.pack(expand=True, fill='both')
 
 # Pack the main notebook
 notebook.pack(expand=1, fill="both")

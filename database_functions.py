@@ -16,14 +16,14 @@ def create_connection():
         return None
 
 # Function to insert test results into the MySQL database
-def insert_test_result(serial_number, status, pc_name, problem, failure_reason):
+def insert_test_result(serial_number,PCBA_Number, status, pc_name, problem, Failure_stage):
     connection = create_connection()
     if connection:
         cursor = connection.cursor()
         try:
-            query = '''INSERT INTO test_results (serial_number, status, pc_name, problem, failure_reason) 
-                       VALUES (%s, %s, %s, %s, %s)'''
-            data = (serial_number, status, pc_name, problem, failure_reason)
+            query = '''INSERT INTO test_results (serial_number,PCBA_Number, status, pc_name, problem, failure_reason) 
+                       VALUES (%s, %s, %s, %s, %s, %s)'''
+            data = (serial_number,PCBA_Number, status, pc_name, problem, Failure_stage)
             cursor.execute(query, data)
             connection.commit()
             print("Test result inserted successfully.")
