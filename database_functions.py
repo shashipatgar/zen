@@ -1,29 +1,30 @@
 import mysql.connector
 from mysql.connector import Error
 
+
 # Function to create a connection to MySQL
 def create_connection():
     try:
         connection = mysql.connector.connect(
-            host='localhost',
-            user='your_username',  # Replace with your MySQL username
-            password='your_password',  # Replace with your MySQL password
-            database='test_db'  # Replace with your database name
+            host='localhost',  # Replace with your MySQL host
+            user='root',  # Replace with your MySQL username
+            password='root',  # Replace with your MySQL password
+            database='Zenmeter_Process_Data'  # Replace with your database name
         )
         return connection
     except Error as e:
-        print(f"Error: {e}")
+        print(f"Failed to connect to database.\nError: {e}")
         return None
 
 # Function to insert test results into the MySQL database
-def insert_test_result(serial_number,PCBA_Number, status, pc_name, problem, Failure_stage):
+def insert_test_result(serial_number,pcba_number, status, pc_name, problem, failure_stage):
     connection = create_connection()
     if connection:
         cursor = connection.cursor()
         try:
-            query = '''INSERT INTO test_results (serial_number,PCBA_Number, status, pc_name, problem, failure_reason) 
+            query = '''INSERT INTO Rework_Debug (serial_number,pcba_number, status, pc_name, problem, failure_stage) 
                        VALUES (%s, %s, %s, %s, %s, %s)'''
-            data = (serial_number,PCBA_Number, status, pc_name, problem, Failure_stage)
+            data = (serial_number,pcba_number, status, pc_name, problem, failure_stage)
             cursor.execute(query, data)
             connection.commit()
             print("Test result inserted successfully.")
@@ -34,18 +35,21 @@ def insert_test_result(serial_number,PCBA_Number, status, pc_name, problem, Fail
             connection.close()
 
 # Function to query test results from MySQL database
-def query_test_result(serial_number):
+def query_test_result(serial_number, pcba_number):
     connection = create_connection()
     if connection:
         cursor = connection.cursor()
         try:
-            query = "SELECT serial_number, status, failure_reason, problem, pc_name, test_time FROM test_results WHERE serial_number = %s"
-            cursor.execute(query, (serial_number,))
+            query = """
+                SELECT serial_number, pcba_number, status, failure_stage, problem, test_time FROM Rework_Debug WHERE serial_number = %s OR pcba_number = %s
+            """
+            cursor.execute(query, (serial_number, pcba_number))
             results = cursor.fetchall()
             return results
-        except Error as e:
+        except Exception as e:
             print(f"Error: {e}")
             return []
         finally:
             cursor.close()
             connection.close()
+
