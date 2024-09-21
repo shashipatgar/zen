@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from database_functions import insert_test_result, query_test_result,create_connection
+from database_functions import insert_test_result, query_test_result
 from connect_create_Database import verify_connection
 
 # Function to change the tab highlight when clicked
@@ -59,7 +59,7 @@ def on_search():
 def display_results(results):
     clear_results()  # Clear any existing results first
 
-    headers = ["Serial Number","PCBA_number", "Status", "Failure Reason", "Problem", "PC Name", "Date & Time"]
+    headers = ["Serial Number","PCBA_number", "Status","Failure stage","Problem","PC Name", "Date & Time"]
     
     for col, header in enumerate(headers):
         tk.Label(result_frame, text=header, bg="#fff",font=('Helvetica', 12, 'bold')).grid(row=0, column=col, padx=10, pady=5)
@@ -92,27 +92,27 @@ style.configure("TNotebook.Tab", background="darkgreen", foreground="Black")
 notebook = ttk.Notebook(root)
 
 # Create the frames for the main tabs with the background color
-operation_history_frame = ttk.Frame(notebook)
-rework_debug_frame = tk.Frame(notebook, bg=bg_color)
+rework_debug_frame = ttk.Frame(notebook)
+operation_history_frame = tk.Frame(notebook, bg=bg_color)
 module_status_frame = tk.Frame(notebook, bg=bg_color)
 seal_scanning_frame = tk.Frame(notebook, bg=bg_color)
 
 # Add the frames as tabs in the notebook
-notebook.add(operation_history_frame, text="Operation History")
 notebook.add(rework_debug_frame, text="Rework & Debug")
+notebook.add(operation_history_frame, text="Operation History")
 notebook.add(module_status_frame, text="Module Status")
 notebook.add(seal_scanning_frame, text="Seal Scanning")
 
 # Add a nested notebook inside "Operation History" for the sub-tabs
-operation_history_notebook = ttk.Notebook(operation_history_frame)
+rework_debug_notebook = ttk.Notebook(rework_debug_frame)
 
 # Create frames for the sub-tabs
-meters_frame = tk.Frame(operation_history_notebook, bg=bg_color)
-Failure_History_frame = ttk.Frame(operation_history_notebook)
+meters_frame = tk.Frame(rework_debug_notebook, bg=bg_color)
+Failure_History_frame = ttk.Frame(rework_debug_notebook)
 
 # Add the sub-tabs to the operation history notebook
-operation_history_notebook.add(meters_frame, text="Meters")
-operation_history_notebook.add(Failure_History_frame, text="Failure History")
+rework_debug_notebook.add(meters_frame, text="Meters")
+rework_debug_notebook.add(Failure_History_frame, text="Failure History")
 
 # Add search section inside the "Failure History" tab
 tk.Label(Failure_History_frame, text="Search Serial Number:", font="lucida 8 bold", bg=meters_frame.cget("bg"), fg="Black").grid(row=0, column=0, padx=10, pady=10)
@@ -127,10 +127,10 @@ result_frame = tk.Frame(Failure_History_frame, bg="#f0f0f0")
 result_frame.grid(row=1, column=0, columnspan=3, padx=10, pady=10, sticky="nw")
 
 # Add dummy tabs for additional functionality
-dummy_tab1_frame = ttk.Frame(operation_history_notebook)
-operation_history_notebook.add(dummy_tab1_frame, text="Low Voltage")
-dummy_tab2_frame = ttk.Frame(operation_history_notebook)
-operation_history_notebook.add(dummy_tab2_frame, text="High Voltage")
+dummy_tab1_frame = ttk.Frame(rework_debug_notebook)
+rework_debug_notebook.add(dummy_tab1_frame, text="Low Voltage")
+dummy_tab2_frame = ttk.Frame(rework_debug_notebook)
+rework_debug_notebook.add(dummy_tab2_frame, text="High Voltage")
 
 # Rework & Debug section
 # Serial Number
@@ -156,7 +156,7 @@ pc_name_entry.grid(row=2, column=1, padx=10, pady=10, sticky='w')
 
 # Failure Stage dropdown
 tk.Label(meters_frame, text="Failure Stage:", anchor='w', width=20, font="lucida 8 bold", bg="light grey").grid(row=2, column=3, padx=2, pady=10, sticky='w')
-choices = ("Product Integration","Firmware", "TCPIP", "Calibration", "Accuracy", "Parameter testing", "Final Verification")
+choices = ("Product Integration stage","Firmware Upload", "TCPIP stage", "Calibration stage", "Accuracy stage", "Parameter testing", "Final Verification stage")
 Stage_selection = ttk.Combobox(meters_frame, values=choices, width=27)
 Stage_selection.grid(row=2, column=4, padx=10, pady=10, sticky='w')
 
@@ -173,12 +173,12 @@ submit_button = tk.Button(meters_frame, text="Submit", command=on_submit)
 submit_button.grid(row=4, column=1, padx=10, pady=10, sticky='w')
 
 # Clear all fields button
-clear_button = tk.Button(operation_history_notebook,bg="dark green", fg="white",text="check database", command= verify_connection)
+clear_button = tk.Button(rework_debug_notebook,bg="dark green", fg="white",text="check database", command= verify_connection)
 clear_button.pack(side="right",anchor="ne",padx=5,pady=5)
 
 # Place the tab containers on the main window
 notebook.pack(expand=True, fill='both')
-operation_history_notebook.pack(expand=True, fill='both')
+rework_debug_notebook.pack(expand=True, fill='both')
 
 # Bind the tab change event to the highlighting function
 notebook.bind("<<NotebookTabChanged>>", on_tab_change)

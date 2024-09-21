@@ -1,5 +1,6 @@
 import mysql.connector
 from mysql.connector import Error
+from tkinter import messagebox
 
 
 # Function to create a connection to MySQL
@@ -13,8 +14,8 @@ def create_connection():
         )
         return connection
     except Error as e:
-        print(f"Failed to connect to database.\nError: {e}")
-        return None
+         messagebox.showerror("Server Connection Error", f"Failed to connect to database.\nError: {e}")
+    
 
 # Function to insert test results into the MySQL database
 def insert_test_result(serial_number,pcba_number, status, pc_name, problem, failure_stage):
@@ -33,6 +34,9 @@ def insert_test_result(serial_number,pcba_number, status, pc_name, problem, fail
         finally:
             cursor.close()
             connection.close()
+    else:
+        connection.rollback()
+
 
 # Function to query test results from MySQL database
 def query_test_result(serial_number, pcba_number):
@@ -41,7 +45,7 @@ def query_test_result(serial_number, pcba_number):
         cursor = connection.cursor()
         try:
             query = """
-                SELECT serial_number, pcba_number, status, failure_stage, problem, test_time FROM Rework_Debug WHERE serial_number = %s OR pcba_number = %s
+                SELECT serial_number, pcba_number, status, failure_stage, problem,pc_name,test_time FROM Rework_Debug WHERE serial_number = %s OR pcba_number = %s
             """
             cursor.execute(query, (serial_number, pcba_number))
             results = cursor.fetchall()
@@ -52,4 +56,5 @@ def query_test_result(serial_number, pcba_number):
         finally:
             cursor.close()
             connection.close()
-
+    else:
+        connection.rollback()
